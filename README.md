@@ -7,6 +7,10 @@
 Non-Standard Python Libraries:
  xmltodict
 
+ Created with Python 3.6
+
+## General
+
 This is a tool that enumerates Amazon S3 buckets and looks for interesting files. 
 
 I have example wordlists but I haven't put much time into refining them. 
@@ -20,8 +24,6 @@ As far as word lists for grepping interesting files, that is completely up to yo
 Using the download feature might fill your hard drive up, you can provide a max file size for each download at the command line when you run the tool. Keep in mind that it is in bytes.
 
 I honestly don't know if Amazon rate limits this, I am guessing they do to some point but I haven't gotten around to figuring out what that limit is. If you want to add some threading features to this tool that would be neat..
-
-
 
 
 
