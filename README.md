@@ -1,6 +1,6 @@
 # AWSBucketDump
 
- #### AWSBucketDump is a tool to quickly enumerate AWS S3 buckets to look for loot. It's similar to a subdomain bruteforcer but is made specifically to S3 buckets and also has some extra features that allow you to grep for delicous files as well as download interesting files if you're not afraid to quickly fill up your hard drive.
+ #### AWSBucketDump is a tool to quickly enumerate AWS S3 buckets to look for loot. It's similar to a subdomain bruteforcer but is made specifically to S3 buckets and also has some extra features that allow you to grep for delicious files as well as download interesting files if you're not afraid to quickly fill up your hard drive.
  #### @okbyenow
 
 ## Pre-Requisites
