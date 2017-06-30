@@ -17,7 +17,7 @@ https://github.com/jhaddix/domain && https://github.com/infosec-au/altdns
 
 As far as word lists for grepping interesting files, that is completely up to you. The one I provided has some basics and yes, those word lists are based on files that I personally have found with this tool.
 
-Using the download feature might fill your hard drive up, you can provide a max file size for download at the command line when you run the tool. Keep in mind that it is in bytes.
+Using the download feature might fill your hard drive up, you can provide a max file size for each download at the command line when you run the tool. Keep in mind that it is in bytes.
 
 I honestly don't know if Amazon rate limits this, I am guessing they do to some point but I haven't gotten around to figuring out what that limit is. If you want to add some threading features to this tool that would be neat..
 
