@@ -110,13 +110,16 @@ def status403(line):
         print("http://"+line.rstrip() + ".s3.amazonaws.com is not accessible")
                 
 def status200(response,grepList,line):
+
         print("Pilfering http://"+line.rstrip()+".s3.amazonaws.com/")
         objects=xmltodict.parse(response)
         Keys = []
         interest=[]
-        for child in objects['ListBucketResult']['Contents']:
-                Keys.append(child['Key'])
-
+        try:
+                for child in objects['ListBucketResult']['Contents']:
+                        Keys.append(child['Key'])
+        except:
+               pass
         for lines in grepList:
                 lines = (str(lines)).rstrip()
                 for words in Keys:
@@ -124,6 +127,5 @@ def status200(response,grepList,line):
                         if lines in words:
                                 interest.append("http://"+line.rstrip()+".s3.amazonaws.com/"+words+"\n")
         return(interest)
-                
                                                 
 main()                  
