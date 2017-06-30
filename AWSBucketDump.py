@@ -12,9 +12,7 @@
 import requests
 import xmltodict
 import sys
-import codecs
 import os
-import argparse
 import shutil
 
 if len(sys.argv) <=2:
