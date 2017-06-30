@@ -23,4 +23,4 @@ I honestly don't know if Amazon rate limits this, I am guessing they do to some 
 
 ## Usage:
 
- `python AWSBucketDump.py top1000.txt grepWords.txt -D 1000000000`
+ `python AWSBucketDump.py <hostlist> <grepWords> [-D] [Max File Size]`
