@@ -1,5 +1,9 @@
 # AWSBucketDump
 
+##Pre-Requisites
+Non-Standard Python Libraries:
+ xmltodict
+
 This is a tool that enumerates Amazon S3 buckets and looks for interesting files. 
 
 I have example wordlists but I haven't put much time into refining them. 
