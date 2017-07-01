@@ -6,6 +6,7 @@
 ## Pre-Requisites
 Non-Standard Python Libraries:
  xmltodict
+ requests
 
  Created with Python 3.6
 
