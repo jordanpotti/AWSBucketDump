@@ -33,55 +33,53 @@ if len(sys.argv) <=2:
         print("\nExample:\n       python AWSBucketDump.py top1000.txt grepWords.txt -D 1000000000")
         sys.exit(0)
 def main():
-        try:
-                download = False
-                if '-D' in str(sys.argv):
-                        download = True
-                        print("You selected the download switch, I hope you have enough room")
-                grepList = open(sys.argv[2], "r")
-                masterList = open('masterList.txt','w+')
-                interestingFiles = open('interestingFiles.txt','w+')
-                responseFile=open('responseFile.txt', "w+")
-                responseFile.close()
-                responseFile = open('responseFile.txt',"wb")
-                with open(sys.argv[1]) as f:
-                        for line in f:
+        download = False
+        if '-D' in str(sys.argv):
+                download = True
+                print("You selected the download switch, I hope you have enough room")
+        grepList = open(sys.argv[2], "r")
+        masterList = open('masterList.txt','w+')
+        interestingFiles = open('interestingFiles.txt','w+')
+        responseFile=open('responseFile.txt', "w+")
+        responseFile.close()
+        responseFile = open('responseFile.txt',"wb")
+        with open(sys.argv[1]) as f:
+                for line in f:
+                        try:
+                                response = ''
                                 try:
-                                        response = ''
-                                        try:
-                                                r = requests.get("http://"+line.rstrip() + ".s3.amazonaws.com")
-                                        except:
-                                                print("http://"+line.rstrip() + ".s3.amazonaws.com doesn't like us...moving on..\n")
-                                                pass
-                                        if r.status_code == 403 or r.status_code ==404:
-                                                status403(line)
-                                                
-
-                                                
-                                        if r.status_code == 200:
-                                                responseFile.write(r.content)
-                                                responseFile.close()
-                                                responseFile = open('responseFile.txt','r+')
-                                                response = responseFile.read()
-                                                if "Content" in response:
-                                                        responseFile.truncate()
-                                                        returnedList=status200(response,grepList,line)
-                                                        for item in returnedList:
-                                                                interestingFiles.write(item)
-                                                        size=str(len(r.content))
-                                                        masterList.write("http://"+line.rstrip() + ".s3.amazonaws.com ----------- "+size +"\n")
-                                        responseFile = open('responseFile.txt',"wb")
-                                        grepList = open(sys.argv[2], "r")
+                                        r = requests.get("http://"+line.rstrip() + ".s3.amazonaws.com")
                                 except:
-                                        print("Oh my goodness that was scary, we almost crashed.. good thing for lazy programmers that resort to try excepts to fix things..")
-                interestingFiles.close()
-                responseFile.close()
-                masterList.close()
-                cleanUp()
-                if download == True:
-                        downloadFiles()
-        except:
-                print("I'm not sure what just happened but lets shut this thing down, I'm sorry..")
+                                        print("http://"+line.rstrip() + ".s3.amazonaws.com doesn't like us...moving on..\n")
+                                        pass
+                                if r.status_code == 403 or r.status_code ==404:
+                                        status403(line)
+                                        
+
+                                        
+                                if r.status_code == 200:
+                                        responseFile.write(r.content)
+                                        responseFile.close()
+                                        responseFile = open('responseFile.txt','r+')
+                                        response = responseFile.read()
+                                        if "Content" in response:
+                                                responseFile.truncate()
+                                                returnedList=status200(response,grepList,line)
+                                                for item in returnedList:
+                                                        interestingFiles.write(item)
+                                                size=str(len(r.content))
+                                                masterList.write("http://"+line.rstrip() + ".s3.amazonaws.com ----------- "+size +"\n")
+                                responseFile = open('responseFile.txt',"wb")
+                                grepList = open(sys.argv[2], "r")
+                        except:
+                                print("We almost crashed.. ")
+        interestingFiles.close()
+        responseFile.close()
+        masterList.close()
+        cleanUp()
+        if download == True:
+                downloadFiles()
+
                         
 def cleanUp():
         print("Cleaning Up Files")
@@ -112,7 +110,6 @@ def downloadFiles():
                                         with open(local_filename, 'wb') as f:
                                                 shutil.copyfileobj(r.raw, f)
                                 r.close()
-        
                 
                 
 
@@ -135,7 +132,12 @@ def status200(response,grepList,line):
                 for words in Keys:
                         words = (str(words)).rstrip()
                         if lines in words:
-                                interest.append("http://"+line.rstrip()+".s3.amazonaws.com/"+words+"\n")
+                                s = requests.get("http://"+line.rstrip()+".s3.amazonaws.com/"+words)
+                                if s.status_code != 200:
+                                        print("")
+                                else:
+                                        interest.append("http://"+line.rstrip()+".s3.amazonaws.com/"+words+"\n")
+                                s.close()
         return(interest)
                                                 
 main()                  
