@@ -26,7 +26,7 @@ Using the download feature might fill your hard drive up, you can provide a max 
 
 I honestly don't know if Amazon rate limits this, I am guessing they do to some point but I haven't gotten around to figuring out what that limit is. If you want to add some threading features to this tool that would be neat..
 
-
+After building this tool, I did find an interesting article from Rapid7 regarding this research: https://community.rapid7.com/community/infosec/blog/2013/03/27/1951-open-s3-buckets
 
 ## Usage:
 
