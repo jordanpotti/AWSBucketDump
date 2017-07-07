@@ -96,6 +96,7 @@ def downloadFiles():
         MAX_SIZE = int(sys.argv[4])
         print(MAX_SIZE)
         print("Beginning File Download, this may take some time..")
+        i = 0
         with open("interestingFiles_Unique.txt", "r") as fileList:
                 for line in fileList:
                         if "http" not in line:
@@ -103,14 +104,18 @@ def downloadFiles():
                         else:
                                 print(line)
                                 local_filename = (line.split('/')[-1]).rstrip()
-                                r = requests.get(line.rstrip(), stream=True)
-                                if int(r.headers['Content-Length']) > MAX_SIZE:
-                                        print("This file is greater than the specified max size.. skipping..\n")
+                                if local_filename =="":
+                                        print("Directory..\n")
                                 else:
-                                        with open(local_filename, 'wb') as f:
-                                                shutil.copyfileobj(r.raw, f)
+                                        r = requests.get(line.rstrip(), stream=True)
+                                        if int(r.headers['Content-Length']) > MAX_SIZE:
+                                                print("This file is greater than the specified max size.. skipping..\n")
+                                        else:
+                                                with open(local_filename, 'wb') as f:
+                                                        shutil.copyfileobj(r.raw, f)
+                                                        i = i+1
                                 r.close()
-                
+        print(str(i) + " Files Downloaded\n")
                 
 
 def status403(line):
