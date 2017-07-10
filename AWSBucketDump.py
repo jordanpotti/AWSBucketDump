@@ -7,7 +7,7 @@
 # afraid to quickly fill up your hard drive.
 
 # by Jordan Potti
-# @okbyenow
+# @ok_bye_now
 
 import requests
 import xmltodict
@@ -24,7 +24,7 @@ if len(sys.argv) <=2:
         afraid to quickly fill up your hard drive.
 
         by Jordan Potti
-        @okbyenow'''
+        @ok_bye_now'''
         )
         print("\nUsage: \n       AWSBucketDump <wordlist> <grepwordlist> -D <Max File Size in Bytes>")
         print("       -D  <Max File Size in Bytes> -  Download Interesting Files")
