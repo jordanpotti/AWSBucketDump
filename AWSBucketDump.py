@@ -55,8 +55,6 @@ def main():
                                 if r.status_code == 403 or r.status_code ==404:
                                         status403(line)
                                         
-
-                                        
                                 if r.status_code == 200:
                                         responseFile.write(r.content)
                                         responseFile.close()
@@ -144,5 +142,6 @@ def status200(response,grepList,line):
                                         interest.append("http://"+line.rstrip()+".s3.amazonaws.com/"+words+"\n")
                                 s.close()
         return(interest)
-                                                
-main()                  
+
+if __name__ == "__main__":
+    main()                  
