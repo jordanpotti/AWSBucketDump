@@ -5,8 +5,12 @@
 
 ## Pre-Requisites
 Non-Standard Python Libraries:
+
  xmltodict
+ 
  requests
+ 
+ argparse
 
  Created with Python 3.6
 
