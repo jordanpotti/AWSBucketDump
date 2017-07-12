@@ -14,9 +14,10 @@ import xmltodict
 import sys
 import os
 import shutil
+from argparse import ArgumentParser
 
-if len(sys.argv) <=2:
-        print('''\nDescription:
+def print_banner():
+         print('''\nDescription:
         AWSBucketDump is a tool to quickly enumerate AWS S3 buckets to look for loot.
         It's similar to a subdomain bruteforcer but is made specifically to S3
         buckets and also has some extra features that allow you to grep for
@@ -25,13 +26,12 @@ if len(sys.argv) <=2:
 
         by Jordan Potti
         @ok_bye_now'''
-        )
-        print("\nUsage: \n       AWSBucketDump <wordlist> <grepwordlist> -D <Max File Size in Bytes>")
-        print("       -D  <Max File Size in Bytes> -  Download Interesting Files")
-        print("       Please be careful when using -D, it ")
-        print("       can fill up your disk space quickly")
-        print("\nExample:\n       python AWSBucketDump.py top1000.txt grepWords.txt -D 1000000000")
+        )   
+
+if len(sys.argv) <=2:
+        print_banner() 
         sys.exit(0)
+
 def main():
         download = False
         if '-D' in str(sys.argv):
