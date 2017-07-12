@@ -45,7 +45,7 @@ def main():
         arguments = parser.parse_args()
 
         # specify primary variables
-        grepList = open(argument.grepwords, "r")
+        grepList = open(arguments.grepwords, "r")
         masterList = open('masterList.txt','w+')
         interestingFiles = open('interestingFiles.txt','w+')
 
