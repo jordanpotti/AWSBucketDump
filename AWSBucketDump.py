@@ -76,7 +76,6 @@ def main():
                                                 size=str(len(r.content))
                                                 masterList.write("http://"+line.rstrip() + ".s3.amazonaws.com ----------- "+size +"\n")
                                 responseFile = open('responseFile.txt',"wb")
-                                grepList = open(sys.argv[2], "r")
                         except:
                                 print("We almost crashed.. ")
         interestingFiles.close()
