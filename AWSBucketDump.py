@@ -14,9 +14,10 @@ import xmltodict
 import sys
 import os
 import shutil
+from argparse import ArgumentParser
 
-if len(sys.argv) <=2:
-        print('''\nDescription:
+def print_banner():
+         print('''\nDescription:
         AWSBucketDump is a tool to quickly enumerate AWS S3 buckets to look for loot.
         It's similar to a subdomain bruteforcer but is made specifically to S3
         buckets and also has some extra features that allow you to grep for
@@ -25,25 +26,34 @@ if len(sys.argv) <=2:
 
         by Jordan Potti
         @ok_bye_now'''
-        )
-        print("\nUsage: \n       AWSBucketDump <wordlist> <grepwordlist> -D <Max File Size in Bytes>")
-        print("       -D  <Max File Size in Bytes> -  Download Interesting Files")
-        print("       Please be careful when using -D, it ")
-        print("       can fill up your disk space quickly")
-        print("\nExample:\n       python AWSBucketDump.py top1000.txt grepWords.txt -D 1000000000")
-        sys.exit(0)
+        )   
+
 def main():
-        download = False
-        if '-D' in str(sys.argv):
-                download = True
-                print("You selected the download switch, I hope you have enough room")
-        grepList = open(sys.argv[2], "r")
+        parser = ArgumentParser()
+        parser.add_argument("-D", dest="download", required=False, action="store_true", default=False, help="Download files. This requires significant diskspace")
+        parser.add_argument("-l", dest="hostlist", required=True, help="") 
+        parser.add_argument("-g", dest="grepwords", required=False, help="Provide a wordlist to grep for")
+        parser.add_argument("-m", dest="maxsize", required=False, help="Maximum file size to download.")
+
+        if len(sys.argv) == 1:
+            print_banner()
+            parser.error("No arguments given.")
+            parser.print_usage
+            sys.exit()
+        
+        # output parsed arguments into a usable object
+        arguments = parser.parse_args()
+
+        # specify primary variables
+        grepList = open(arguments.grepwords, "r")
         masterList = open('masterList.txt','w+')
         interestingFiles = open('interestingFiles.txt','w+')
+
         responseFile=open('responseFile.txt', "w+")
         responseFile.close()
         responseFile = open('responseFile.txt',"wb")
-        with open(sys.argv[1]) as f:
+        
+        with open(arguments.hostlist) as f:
                 for line in f:
                         try:
                                 response = ''
@@ -54,8 +64,6 @@ def main():
                                         pass
                                 if r.status_code == 403 or r.status_code ==404:
                                         status403(line)
-                                        
-
                                         
                                 if r.status_code == 200:
                                         responseFile.write(r.content)
@@ -70,17 +78,16 @@ def main():
                                                 size=str(len(r.content))
                                                 masterList.write("http://"+line.rstrip() + ".s3.amazonaws.com ----------- "+size +"\n")
                                 responseFile = open('responseFile.txt',"wb")
-                                grepList = open(sys.argv[2], "r")
                         except:
                                 print("We almost crashed.. ")
         interestingFiles.close()
         responseFile.close()
         masterList.close()
         cleanUp()
-        if download == True:
-                downloadFiles()
-
+        if arguments.download == True:
+                downloadFiles(arguments.maxsize)
                         
+
 def cleanUp():
         print("Cleaning Up Files")
         f = open("interestingFiles.txt")
@@ -92,8 +99,8 @@ def cleanUp():
         os.remove("interestingFiles.txt")
         os.remove("responseFile.txt")
         
-def downloadFiles():
-        MAX_SIZE = int(sys.argv[4])
+def downloadFiles(maxsize):
+        MAX_SIZE = int(maxsize)
         print(MAX_SIZE)
         print("Beginning File Download, this may take some time..")
         i = 0
@@ -144,5 +151,6 @@ def status200(response,grepList,line):
                                         interest.append("http://"+line.rstrip()+".s3.amazonaws.com/"+words+"\n")
                                 s.close()
         return(interest)
-                                                
-main()                  
+
+if __name__ == "__main__":
+    main()                  
