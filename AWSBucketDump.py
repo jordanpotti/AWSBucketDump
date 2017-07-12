@@ -28,18 +28,26 @@ def print_banner():
         @ok_bye_now'''
         )   
 
-if len(sys.argv) <=2:
-        print_banner() 
-        sys.exit(0)
-
 def main():
-        download = False
-        if '-D' in str(sys.argv):
-                download = True
-                print("You selected the download switch, I hope you have enough room")
-        grepList = open(sys.argv[2], "r")
+        parser = ArgumentParser()
+        parser.add_argument("-D", dest="download", required=False, action="store_true", default=False, help="Download files. This requires significant diskspace")
+        parser.add_argument("-l", dest="hostlist", required=True, help="") 
+        parser.add_argument("-g", dest="grepwords", required=False, help="Provide a wordlist to grep for")
+        
+        if len(sys.argv) == 1:
+            print_banner()
+            parser.error("No arguments given.")
+            parser.print_usage
+            sys.exit()
+        
+        # output parsed arguments into a usable object
+        arguments = parser.parse_args()
+
+        # specify primary variables
+        grepList = open(argument.grepwords, "r")
         masterList = open('masterList.txt','w+')
         interestingFiles = open('interestingFiles.txt','w+')
+
         responseFile=open('responseFile.txt', "w+")
         responseFile.close()
         responseFile = open('responseFile.txt',"wb")
