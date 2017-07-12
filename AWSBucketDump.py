@@ -33,7 +33,8 @@ def main():
         parser.add_argument("-D", dest="download", required=False, action="store_true", default=False, help="Download files. This requires significant diskspace")
         parser.add_argument("-l", dest="hostlist", required=True, help="") 
         parser.add_argument("-g", dest="grepwords", required=False, help="Provide a wordlist to grep for")
-        
+        parser.add_argument("-m", dest="maxsize", required=False, help="Maximum file size to download.")
+
         if len(sys.argv) == 1:
             print_banner()
             parser.error("No arguments given.")
@@ -51,7 +52,8 @@ def main():
         responseFile=open('responseFile.txt', "w+")
         responseFile.close()
         responseFile = open('responseFile.txt',"wb")
-        with open(sys.argv[1]) as f:
+        
+        with open(arguments.hostlist) as f:
                 for line in f:
                         try:
                                 response = ''
@@ -82,10 +84,10 @@ def main():
         responseFile.close()
         masterList.close()
         cleanUp()
-        if download == True:
-                downloadFiles()
-
+        if arguments.download == True:
+                downloadFiles(arguments.maxsize)
                         
+
 def cleanUp():
         print("Cleaning Up Files")
         f = open("interestingFiles.txt")
@@ -97,8 +99,8 @@ def cleanUp():
         os.remove("interestingFiles.txt")
         os.remove("responseFile.txt")
         
-def downloadFiles():
-        MAX_SIZE = int(sys.argv[4])
+def downloadFiles(maxsize):
+        MAX_SIZE = int(maxsize)
         print(MAX_SIZE)
         print("Beginning File Download, this may take some time..")
         i = 0
