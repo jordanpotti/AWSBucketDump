@@ -44,4 +44,4 @@ After building this tool, I did find an interesting article from Rapid7 regardin
  ` -g GREPWORDS  Provide a wordlist to grep for`
   `-m MAXSIZE    Maximum file size to download.`
   
- `python AWSBucketDump.py -l BucketNames.txt -g interesting_Keywords.txt -D -m 500000`
+ `python AWSBucketDump.py -l BucketNames.txt -g interesting_Keywords.txt -D -m 500000 -d 1`
