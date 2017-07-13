@@ -170,7 +170,7 @@ def status200(response,grepList,line):
                     print("Received %s on %s" % (s.status_code, words))
                 else:
                     interest.append("http://"+line.rstrip()+".s3.amazonaws.com/"+words+"\n")
-                 s.close()
+                s.close()
 
         return(interest)
 if __name__ == "__main__":
