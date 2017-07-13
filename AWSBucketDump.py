@@ -131,7 +131,7 @@ def downloadFiles(maxsize, mkdir = False):
                                                 else:
                                                         print("Using existing directory for host: (%s)" % local_savedir)
 
-                                                print("Saving file to: %s") % local_filename
+                                                print("Saving file to: %s" % local_filename)
 
 
                                         r = requests.get(line.rstrip(), stream=True)
