@@ -146,9 +146,9 @@ def status403(line):
 
 
 def queue_up_download(filepath):
-    download_q.put(collectable)
-    print('Collectable: {}'.format(collectable))
-    write_interesting_file(collectable)
+    download_q.put(filepath)
+    print('Collectable: {}'.format(filepath))
+    write_interesting_file(filepath)
 
 
 def status200(response,grep_list,line):
@@ -165,7 +165,7 @@ def status200(response,grep_list,line):
     for words in Keys:
         words = (str(words)).rstrip()
         collectable = line+'/'+words
-        if False and grep_list != None and len(grep_list) > 0:
+        if grep_list != None and len(grep_list) > 0:
             for grep_line in grep_list:
                 grep_line = (str(grep_line)).rstrip()
                 if grep_line in words:
@@ -196,7 +196,9 @@ def main():
         arguments = parser.parse_args()
 
         # specify primary variables
-        grep_list = open(arguments.grepwords, "r")
+        with open(arguments.grepwords, "r") as grep_file:
+            grep_content = grep_file.readlines()
+        grep_list = [ g.strip() for g in grep_content ]
 
         if arguments.download and arguments.savedir:
                 print("Downloads enabled (-D), and save directories (-d) for each host will be created/used")
