@@ -9,72 +9,33 @@
 # by Jordan Potti
 # @ok_bye_now
 
+from argparse import ArgumentParser
 import codecs
 import requests
 import xmltodict
 import sys
 import os
 import shutil
-from optparse import OptionParser
 from queue import Queue
 from threading import Thread
-
-parser = OptionParser()
-parser.add_option("-D", type="int", help="Enable Downloads and set size", dest="max_file_size", metavar="DOWNLOAD_SIZE", default=-1)
-parser.add_option("-t", type="int", help="Threads", dest="thread_cnt", metavar="THREAD_COUNT", default=1)
-(options, args) = parser.parse_args()
-
-print(options)
-
-
-print(args)
-
-
-if len(args) <=1:
-    print('''\nDescription:
-    AWSBucketDump is a tool to quickly enumerate AWS S3 buckets to look for loot.
-    It's similar to a subdomain bruteforcer but is made specifically to S3
-    buckets and also has some extra features that allow you to grep for
-    delicous files as well as download interesting files if you're not
-    afraid to quickly fill up your hard drive.
-
-    by Jordan Potti
-    @ok_bye_now'''
-    )
-    print("\nUsage: \n       AWSBucketDump -D <DOWNLOAD_SIZE> -t THREAD_COUNT <wordlist> <grepwordlist>")
-    print("       -D  <Max File Size in Bytes> -  Download Interesting Files")
-    print("       Please be careful when using -D, it ")
-    print("       can fill up your disk space quickly")
-    print("       -t how many threads to run")
-    print("\nExample:\n       python -D 10000000 -t 3 AWSBucketDump.py top1000.txt grepWords.txt")
-    sys.exit(0)
-
-masterList = open('masterList.txt','w+')
-interestingFiles = open('interestingFiles.txt','w+')
 
 q = Queue()
 download_q = Queue()
 
+grepList=None
+
+MAX_SIZE=10000
+
 def fetch(url):
+    print('fetching ' + url)
     response = requests.get(url)
     if response.status_code == 403 or response.status_code == 404:
         status403(url)
     if response.status_code == 200:
-        responseFile = open('responseFile.txt', 'wb')
-        responseFile.truncate()
-        responseFile.write(codecs.encode(response.text))
-        responseFile.close()
-        responseFile = open('responseFile.txt', 'r+')
-        response = responseFile.read()
-        if "Content" in response:
-            responseFile.truncate()
-            grepList = open(args[1], "r")
+        print(response.text)
+        if "Content" in response.text:
             returnedList=status200(response,grepList,url)
-            for item in returnedList:
-                interestingFiles.write(item)
-                download_q.put(item)
-            size=str(len(response))
-            masterList.write('{} -------{}\n'.format(url, size))
+
 
 def worker():
     while True:
@@ -86,6 +47,7 @@ def worker():
         q.task_done()
 
 def downloadWorker():
+    print('download worker running')
     while True:
         item = download_q.get()
         try:
@@ -93,42 +55,6 @@ def downloadWorker():
         except Exception as e:
             print(e)
         download_q.task_done()
-
-def main():
-    download = False
-    if options.max_file_size >= 0:
-        download = True
-        print("You selected the download switch, I hope you have enough room")
-        num_of_download_threads = options.thread_cnt
-        for i in range(0,num_of_download_threads):
-            t = Thread(target=downloadWorker)
-            t.daemon = True
-            t.start()
-
-    num_of_threads = options.thread_cnt
-    for i in range(0,num_of_threads):
-        t = Thread(target=worker)
-        t.daemon = True
-        t.start()
-
-    with open(args[0]) as f: # bucket names
-        
-        for line in f:
-            q.put('http://'+line.strip()+'.s3.amazonaws.com')
-       
-    q.join()
-    download_q.join()
-
-def cleanUp():
-    print("Cleaning Up Files")
-    f = open("interestingFiles.txt")
-    f2 = open("interestingFiles_Unique.txt", "w")
-    uniquelines = set(f.read().split("\n"))
-    f2.write("".join([line + "\n" for line in uniquelines]))
-    f2.close()
-    f.close()
-    os.remove("interestingFiles.txt")
-    os.remove("responseFile.txt")
 
 def get_make_directory_return_filename_path(url):
     bits = url.split('/')
@@ -143,7 +69,6 @@ def get_make_directory_return_filename_path(url):
     return os.path.join(directory, bits[-1]).rstrip()
 
 def downloadFile(filename):
-    MAX_SIZE = options.max_file_size
     print('Downloading {}'.format(filename))
     local_path = get_make_directory_return_filename_path(filename)
     local_filename = (filename.split('/')[-1]).rstrip()
@@ -160,12 +85,86 @@ def downloadFile(filename):
         r.close()
 
 
+def print_banner():
+         print('''\nDescription:
+        AWSBucketDump is a tool to quickly enumerate AWS S3 buckets to look for loot.
+        It's similar to a subdomain bruteforcer but is made specifically to S3
+        buckets and also has some extra features that allow you to grep for
+        delicous files as well as download interesting files if you're not
+        afraid to quickly fill up your hard drive.
+
+        by Jordan Potti
+        @ok_bye_now'''
+        )   
+
+def main():
+        parser = ArgumentParser()
+        parser.add_argument("-D", dest="download", required=False, action="store_true", default=False, help="Download files. This requires significant diskspace") 
+        parser.add_argument("-d", dest="savedir", required=False, default=False, help="if -D, then -d 1 to create save directories for each bucket with results.")
+        parser.add_argument("-l", dest="hostlist", required=True, help="") 
+        parser.add_argument("-g", dest="grepwords", required=False, help="Provide a wordlist to grep for")
+        parser.add_argument("-m", dest="maxsize", required=False, default=1024, help="Maximum file size to download.")
+        parser.add_argument("-t", dest="threads", type=int, required=False, default=1, help="thread count.")
+
+        if len(sys.argv) == 1:
+            print_banner()
+            parser.error("No arguments given.")
+            parser.print_usage
+            sys.exit()
+
+        
+        # output parsed arguments into a usable object
+        arguments = parser.parse_args()
+        MAX_SIZE=arguments.maxsize
+
+        # specify primary variables
+        grepList = open(arguments.grepwords, "r")
+
+        if arguments.download and arguments.savedir:
+                print("Downloads enabled (-D), and save directories (-d) for each host will be created/used")
+                #downloadFiles(arguments.maxsize, arguments.savedir)
+                for i in range(1, arguments.threads):
+                    t = Thread(target=downloadWorker)
+                    t.daemon = True
+                    t.start()
+
+        elif arguments.download and not arguments.savedir:
+                print("Downloads enabled (-D), and will be saved to current directory")
+                #downloadFiles(arguments.maxsize)
+                for i in range(1, arguments.threads):
+                    t = Thread(target=downloadWorker)
+                    t.daemon = True
+                    t.start()
+        else:
+                print("Downloads were not enabled (-D), not saving results locally.")
+
+        for i in range(0,arguments.threads):
+            print('starting thread')
+            t = Thread(target=worker)
+            t.daemon = True
+            t.start()
+        
+        with open(arguments.hostlist) as f:
+                for line in f:
+                        bucket = 'http://'+line.rstrip()+'.s3.amazonaws.com'
+                        print('queuing {}'.format(bucket))
+                        q.put(bucket)
+
+        q.join()
+        if arguments.download:
+                download_q.join()
+
+        cleanUp()
+
+def cleanUp():
+        print("Cleaning Up Files")
+        
 def status403(line):
     print(line.rstrip() + " is not accessible")
 
 def status200(response,grepList,line):
     print("Pilfering "+line.rstrip())
-    objects=xmltodict.parse(response)
+    objects=xmltodict.parse(response.text)
     Keys = []
     interest=[]
     try:
@@ -176,14 +175,19 @@ def status200(response,grepList,line):
     hit = False
     for words in Keys:
         words = (str(words)).rstrip()
-        for grep_line in grepList:
-            grep_line = (str(grep_line)).rstrip()
-            if grep_line in words:
-                    collectable = line+'/'+words
-                    interest.append(collectable+"\n")
-                    print('Collectable: {}'.format(collectable))
-                    break
-    return(interest)
-                                                
-if __name__ == '__main__':
+        collectable = line+'/'+words
+        if False and grepList != None and len(grepList) > 0:
+            for grep_line in grepList:
+                grep_line = (str(grep_line)).rstrip()
+                if grep_line in words:
+                        download_q.put(collectable)
+                        print('Collectable: {}'.format(collectable))
+                        break
+        else:
+            download_q.put(collectable)
+            print('Collectable: {}'.format(collectable))
+                
+
+if __name__ == "__main__":
     main()
+
