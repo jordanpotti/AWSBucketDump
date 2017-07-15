@@ -30,4 +30,4 @@ After building this tool, I did find an interesting article from Rapid7 regardin
 
 ## Usage:
 
- `python AWSBucketDump.py <hostlist> <grepWords> [-D] [Max File Size]`
+ `python AWSBucketDump.py -D [Max File Size] -t [Number of threads] <hostlist> <grepWords> 
