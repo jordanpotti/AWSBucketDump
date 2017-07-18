@@ -28,18 +28,19 @@ As far as word lists for grepping interesting files, that is completely up to yo
 
 Using the download feature might fill your hard drive up, you can provide a max file size for each download at the command line when you run the tool. Keep in mind that it is in bytes.
 
-I honestly don't know if Amazon rate limits this, I am guessing they do to some point but I haven't gotten around to figuring out what that limit is. If you want to add some threading features to this tool that would be neat..
+I honestly don't know if Amazon rate limits this, I am guessing they do to some point but I haven't gotten around to figuring out what that limit is.  By default there are two threads for checking buckets and two buckets for downloading.  
 
 After building this tool, I did find an interesting article from Rapid7 regarding this research: https://community.rapid7.com/community/infosec/blog/2013/03/27/1951-open-s3-buckets
 
 ## Usage:
 
-`usage: AWSBucketDump.py [-h] [-D] -l HOSTLIST [-g GREPWORDS] [-m MAXSIZE]`
+`usage: AWSBucketDump.py [-h] [-D] [-t THREADS] -l HOSTLIST [-g GREPWORDS] [-m MAXSIZE]`
 
 `optional arguments:`
 `  -h, --help    show this help message and exit`
 `  -D            Download files. This requires significant diskspace`
 `  -d            If set to 1 or True, create directories for each host w/ results`
+`  -t THREADS    number of threads`
  ` -l HOSTLIST`
  ` -g GREPWORDS  Provide a wordlist to grep for`
   `-m MAXSIZE    Maximum file size to download.`
