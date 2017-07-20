@@ -126,7 +126,7 @@ def downloadFile(filename):
 
 
 def print_banner():
-         print('''\nDescription:
+        print('''\nDescription:
         AWSBucketDump is a tool to quickly enumerate AWS S3 buckets to look for loot.
         It's similar to a subdomain bruteforcer but is made specifically to S3
         buckets and also has some extra features that allow you to grep for
@@ -139,8 +139,8 @@ def print_banner():
 
 
 def cleanUp():
-        print("Cleaning Up Files")
-        
+   print("Cleaning Up Files")
+
 def status403(line):
     print(line.rstrip() + " is not accessible")
 
@@ -175,62 +175,62 @@ def status200(response,grep_list,line):
             queue_up_download(collectable)
 
 def main():
-        global arguments
-        global grep_list
-        parser = ArgumentParser()
-        parser.add_argument("-D", dest="download", required=False, action="store_true", default=False, help="Download files. This requires significant diskspace") 
-        parser.add_argument("-d", dest="savedir", required=False, default='', help="if -D, then -d 1 to create save directories for each bucket with results.")
-        parser.add_argument("-l", dest="hostlist", required=True, help="") 
-        parser.add_argument("-g", dest="grepwords", required=False, help="Provide a wordlist to grep for")
-        parser.add_argument("-m", dest="maxsize", type=int, required=False, default=1024, help="Maximum file size to download.")
-        parser.add_argument("-t", dest="threads", type=int, required=False, default=1, help="thread count.")
+    global arguments
+    global grep_list
+    parser = ArgumentParser()
+    parser.add_argument("-D", dest="download", required=False, action="store_true", default=False, help="Download files. This requires significant diskspace") 
+    parser.add_argument("-d", dest="savedir", required=False, default='', help="if -D, then -d 1 to create save directories for each bucket with results.")
+    parser.add_argument("-l", dest="hostlist", required=True, help="") 
+    parser.add_argument("-g", dest="grepwords", required=False, help="Provide a wordlist to grep for")
+    parser.add_argument("-m", dest="maxsize", type=int, required=False, default=1024, help="Maximum file size to download.")
+    parser.add_argument("-t", dest="threads", type=int, required=False, default=1, help="thread count.")
 
-        if len(sys.argv) == 1:
-            print_banner()
-            parser.error("No arguments given.")
-            parser.print_usage
-            sys.exit()
+    if len(sys.argv) == 1:
+        print_banner()
+        parser.error("No arguments given.")
+        parser.print_usage
+        sys.exit()
 
-        
-        # output parsed arguments into a usable object
-        arguments = parser.parse_args()
+    
+    # output parsed arguments into a usable object
+    arguments = parser.parse_args()
 
-        # specify primary variables
-        with open(arguments.grepwords, "r") as grep_file:
-            grep_content = grep_file.readlines()
-        grep_list = [ g.strip() for g in grep_content ]
+    # specify primary variables
+    with open(arguments.grepwords, "r") as grep_file:
+        grep_content = grep_file.readlines()
+    grep_list = [ g.strip() for g in grep_content ]
 
-        if arguments.download and arguments.savedir:
-                print("Downloads enabled (-D), and save directories (-d) for each host will be created/used")
-        elif arguments.download and not arguments.savedir:
-                print("Downloads enabled (-D), and will be saved to current directory")
-        else:
-                print("Downloads were not enabled (-D), not saving results locally.")
+    if arguments.download and arguments.savedir:
+        print("Downloads enabled (-D), and save directories (-d) for each host will be created/used")
+    elif arguments.download and not arguments.savedir:
+        print("Downloads enabled (-D), and will be saved to current directory")
+    else:
+        print("Downloads were not enabled (-D), not saving results locally.")
 
-        # start up bucket workers
-        for i in range(0,arguments.threads):
-            print('starting thread')
-            t = Thread(target=bucket_worker)
-            t.daemon = True
-            t.start()
+    # start up bucket workers
+    for i in range(0,arguments.threads):
+        print('starting thread')
+        t = Thread(target=bucket_worker)
+        t.daemon = True
+        t.start()
        
-        # start download workers 
-        for i in range(1, arguments.threads):
-            t = Thread(target=downloadWorker)
-            t.daemon = True
-            t.start()
+    # start download workers 
+    for i in range(1, arguments.threads):
+        t = Thread(target=downloadWorker)
+        t.daemon = True
+        t.start()
 
-        with open(arguments.hostlist) as f:
-                for line in f:
-                        bucket = 'http://'+line.rstrip()+'.s3.amazonaws.com'
-                        print('queuing {}'.format(bucket))
-                        bucket_q.put(bucket)
+    with open(arguments.hostlist) as f:
+        for line in f:
+            bucket = 'http://'+line.rstrip()+'.s3.amazonaws.com'
+            print('queuing {}'.format(bucket))
+            bucket_q.put(bucket)
 
-        bucket_q.join()
-        if arguments.download:
-                download_q.join()
+    bucket_q.join()
+    if arguments.download:
+        download_q.join()
 
-        cleanUp()
+    cleanUp()
 
 if __name__ == "__main__":
     main()
