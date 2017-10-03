@@ -6,13 +6,11 @@
 ## Pre-Requisites
 Non-Standard Python Libraries:
 
- xmltodict
- 
- requests
- 
- argparse
+* xmltodict
+* requests
+* argparse
 
- Created with Python 3.6
+Created with Python 3.6
 
 ## General
 
@@ -30,19 +28,19 @@ Using the download feature might fill your hard drive up, you can provide a max 
 
 I honestly don't know if Amazon rate limits this, I am guessing they do to some point but I haven't gotten around to figuring out what that limit is.  By default there are two threads for checking buckets and two buckets for downloading.  
 
-After building this tool, I did find an interesting article from Rapid7 regarding this research: https://community.rapid7.com/community/infosec/blog/2013/03/27/1951-open-s3-buckets
+After building this tool, I did find an [interesting article](https://community.rapid7.com/community/infosec/blog/2013/03/27/1951-open-s3-buckets) from Rapid7 regarding this research.
 
 ## Usage:
 
-`usage: AWSBucketDump.py [-h] [-D] [-t THREADS] -l HOSTLIST [-g GREPWORDS] [-m MAXSIZE]`
+    usage: AWSBucketDump.py [-h] [-D] [-t THREADS] -l HOSTLIST [-g GREPWORDS] [-m MAXSIZE]
 
-`optional arguments:`
-`  -h, --help    show this help message and exit`
-`  -D            Download files. This requires significant diskspace`
-`  -d            If set to 1 or True, create directories for each host w/ results`
-`  -t THREADS    number of threads`
- ` -l HOSTLIST`
- ` -g GREPWORDS  Provide a wordlist to grep for`
-  `-m MAXSIZE    Maximum file size to download.`
+    optional arguments:
+      -h, --help    show this help message and exit
+      -D            Download files. This requires significant diskspace
+      -d            If set to 1 or True, create directories for each host w/ results
+      -t THREADS    number of threads
+      -l HOSTLIST
+      -g GREPWORDS  Provide a wordlist to grep for
+      -m MAXSIZE    Maximum file size to download.
   
- `python AWSBucketDump.py -l BucketNames.txt -g interesting_Keywords.txt -D -m 500000 -d 1`
+     python AWSBucketDump.py -l BucketNames.txt -g interesting_Keywords.txt -D -m 500000 -d 1
