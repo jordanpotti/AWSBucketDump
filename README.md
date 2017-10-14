@@ -14,6 +14,12 @@ Non-Standard Python Libraries:
 
  Created with Python 3.6
 
+### Install with virtualenv
+```virtualenv-3.6 venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
 ## General
 
 This is a tool that enumerates Amazon S3 buckets and looks for interesting files. 
