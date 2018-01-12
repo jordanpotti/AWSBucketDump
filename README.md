@@ -51,7 +51,7 @@ After building this tool, I did find an [interesting article](https://community.
   
      python AWSBucketDump.py -l BucketNames.txt -g interesting_Keywords.txt -D -m 500000 -d 1
 
-# Contributors
+### Contributors
 
 [jordanpotti](https://github.com/jordanpotti)
 
