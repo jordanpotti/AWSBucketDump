@@ -24,12 +24,12 @@ from threading import Thread, Lock
 bucket_q = Queue()
 download_q = Queue()
 
-grep_list=None
+grep_list = None
 
 arguments = None
 
 def fetch(url):
-    print('fetching ' + url)
+    print('Fetching ' + url + '...')
     response = requests.get(url)
     if response.status_code == 403 or response.status_code == 404:
         status403(url)
@@ -49,7 +49,7 @@ def bucket_worker():
         bucket_q.task_done()
 
 def downloadWorker():
-    print('download worker running')
+    print('Download worker running...')
     while True:
         item = download_q.get()
         try:
@@ -107,7 +107,7 @@ def write_interesting_file(filepath):
 
 def downloadFile(filename):
     global arguments
-    print('Downloading {}'.format(filename))
+    print('Downloading {}'.format(filename) + '...')
     local_path = get_make_directory_return_filename_path(filename)
     local_filename = (filename.split('/')[-1]).rstrip()
     print('local {}'.format(local_path))
@@ -117,7 +117,7 @@ def downloadFile(filename):
         r = requests.get(filename.rstrip(), stream=True)
         if 'Content-Length' in r.headers:
             if int(r.headers['Content-Length']) > arguments.maxsize:
-                print("This file is greater than the specified max size.. skipping..\n")
+                print("This file is greater than the specified max size... skipping...\n")
             else:
                 with open(local_path, 'wb') as f:
                     shutil.copyfileobj(r.raw, f)
@@ -139,10 +139,10 @@ def print_banner():
 
 
 def cleanUp():
-   print("Cleaning Up Files")
+   print("Cleaning up files...")
 
 def status403(line):
-    print(line.rstrip() + " is not accessible")
+    print(line.rstrip() + " is not accessible.")
 
 
 def queue_up_download(filepath):
@@ -152,7 +152,7 @@ def queue_up_download(filepath):
 
 
 def status200(response,grep_list,line):
-    print("Pilfering "+line.rstrip())
+    print("Pilfering "+line.rstrip() + '...')
     objects=xmltodict.parse(response.text)
     Keys = []
     interest=[]
@@ -178,12 +178,12 @@ def main():
     global arguments
     global grep_list
     parser = ArgumentParser()
-    parser.add_argument("-D", dest="download", required=False, action="store_true", default=False, help="Download files. This requires significant diskspace") 
-    parser.add_argument("-d", dest="savedir", required=False, default='', help="if -D, then -d 1 to create save directories for each bucket with results.")
+    parser.add_argument("-D", dest="download", required=False, action="store_true", default=False, help="Download files. This requires significant disk space.") 
+    parser.add_argument("-d", dest="savedir", required=False, default='', help="If -D, then -d 1 to create save directories for each bucket with results.")
     parser.add_argument("-l", dest="hostlist", required=True, help="") 
-    parser.add_argument("-g", dest="grepwords", required=False, help="Provide a wordlist to grep for")
+    parser.add_argument("-g", dest="grepwords", required=False, help="Provide a wordlist to grep for.")
     parser.add_argument("-m", dest="maxsize", type=int, required=False, default=1024, help="Maximum file size to download.")
-    parser.add_argument("-t", dest="threads", type=int, required=False, default=1, help="thread count.")
+    parser.add_argument("-t", dest="threads", type=int, required=False, default=1, help="Number of threads.")
 
     if len(sys.argv) == 1:
         print_banner()
@@ -201,15 +201,15 @@ def main():
     grep_list = [ g.strip() for g in grep_content ]
 
     if arguments.download and arguments.savedir:
-        print("Downloads enabled (-D), and save directories (-d) for each host will be created/used")
+        print("Downloads enabled (-D), save directories (-d) for each host will be created/used.")
     elif arguments.download and not arguments.savedir:
-        print("Downloads enabled (-D), and will be saved to current directory")
+        print("Downloads enabled (-D), will be saved to current directory.")
     else:
         print("Downloads were not enabled (-D), not saving results locally.")
 
     # start up bucket workers
     for i in range(0,arguments.threads):
-        print('starting thread')
+        print('Starting thread...')
         t = Thread(target=bucket_worker)
         t.daemon = True
         t.start()
@@ -223,7 +223,7 @@ def main():
     with open(arguments.hostlist) as f:
         for line in f:
             bucket = 'http://'+line.rstrip()+'.s3.amazonaws.com'
-            print('queuing {}'.format(bucket))
+            print('Queuing {}'.format(bucket) + '...')
             bucket_q.put(bucket)
 
     bucket_q.join()
