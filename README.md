@@ -50,3 +50,22 @@ After building this tool, I did find an [interesting article](https://community.
       -m MAXSIZE    Maximum file size to download.
   
      python AWSBucketDump.py -l BucketNames.txt -g interesting_Keywords.txt -D -m 500000 -d 1
+
+# Contributors
+
+[jordanpotti](https://github.com/jordanpotti)
+
+[grogsaxle](https://github.com/grogsaxle)
+
+[codingo](https://github.com/codingo)
+
+[aarongorka](https://github.com/aarongorka)
+
+[BHaFSec](https://github.com/BHaFSec)
+
+[paralax](https://github.com/paralax)
+
+[fzzo](https://github.com/fzzo)
+
+[rypb](https://github.com/rypb)
+
