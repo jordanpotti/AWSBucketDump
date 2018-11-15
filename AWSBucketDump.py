@@ -18,9 +18,10 @@ import os
 import shutil
 import traceback
 import yara
+import logging
 from queue import Queue
 from threading import Thread, Lock
-
+from common import pretty_print, log
 
 bucket_q = Queue()
 download_q = Queue()
@@ -31,6 +32,9 @@ arguments = None
 
 yara_rules = None
 
+#Disable requests logging
+logging.getLogger("requests").setLevel(logging.WARNING)
+
 def yara_index_build():
     with open('YaraRules/index.yar', 'w') as yar:
         for filename in os.listdir('YaraRules'):
@@ -39,7 +43,7 @@ def yara_index_build():
                 yar.write(include)
 
 def fetch(url):
-    print('Fetching ' + url + '...')
+    log('Fetching ' + url + '...',logging.DEBUG)
     response = requests.get(url)
     if response.status_code == 403 or response.status_code == 404:
         status403(url)
@@ -51,22 +55,23 @@ def fetch(url):
 def bucket_worker():
     while True:
         item = bucket_q.get()
+	print("Processing: {}".format(item))
         try:
             fetch(item)
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
-            print(e)
+            log(e,logging.ERROR)
         bucket_q.task_done()
 
 def downloadWorker():
-    print('Download worker running...')
+    log('Download worker running...',logging.DEBUG)
     while True:
         item = download_q.get()
         try:
             downloadFile(item)
         except Exception as e:
             traceback.print_exc(file=sys.stdout)
-            print(e)
+            logging(e,logging.ERROR)
         download_q.task_done()
 
 directory_lock = Lock()
@@ -90,7 +95,7 @@ def get_make_directory_return_filename_path(url):
             os.makedirs(directory)
     except Exception as e:
         traceback.print_exc(file=sys.stdout)
-        print(e)
+        log(e,logging.ERROR)
     finally:
         release_directory_lock()
 
@@ -118,17 +123,17 @@ def write_interesting_file(filepath):
 def downloadFile(filename):
     global arguments
     allowFileWrite = True
-    print('Downloading {}'.format(filename) + '...')
+    log('Downloading: {}'.format(filename))
     local_path = get_make_directory_return_filename_path(filename)
     local_filename = (filename.split('/')[-1]).rstrip()
-    print('local {}'.format(local_path))
+    log('Local File: {}'.format(local_path))
     if local_filename =="":
-        print("Directory..\n")
+        log("Directory..\n",logging.DEBUG)
     else:
         r = requests.get(filename.rstrip(), stream=True)
         if 'Content-Length' in r.headers:
             if int(r.headers['Content-Length']) > arguments.maxsize:
-                print("This file is greater than the specified max size... skipping...\n")
+                log("Content Length Exceeded: {} is greater than the specified max size. Skipped".format(filename))
             else:
                 file_data = r.content
                 if yara_rules != None:
@@ -136,7 +141,7 @@ def downloadFile(filename):
                     if len(matches) > 0:
                         for match in matches:
                             #print str(match.rule)
-                            print("{} matched a Yara rule - {}".format(filename,match))
+                            log("Yara Rule Match: {} matched {}".format(filename,match))
                     else:
                         allowFileWrite = False
                 if allowFileWrite == True:
@@ -160,20 +165,20 @@ def print_banner():
 
 
 def cleanUp():
-   print("Cleaning up files...")
+    log("Cleaning up files...",logging.DEBUG)
 
 def status403(line):
-    print(line.rstrip() + " is not accessible.")
+    log("403 Error: "+line.rstrip() + " is not accessible.")
 
 
 def queue_up_download(filepath):
     download_q.put(filepath)
-    print('Collectable: {}'.format(filepath))
+    log('Collectable: {}'.format(filepath),logging.DEBUG)
     write_interesting_file(filepath)
 
 
 def status200(response,grep_list,yara_rules,line):
-    print("Pilfering "+line.rstrip() + '...')
+    log("Pilfering "+line.rstrip() + '...',logging.DEBUG)
     objects=xmltodict.parse(response.text)
     Keys = []
     interest=[]
@@ -227,14 +232,14 @@ def main():
 
     if arguments.download and arguments.savedir:
         print("Downloads enabled (-D), save directories (-d) for each host will be created/used.")
+        print("Default Download Directory: {}".format(arguments.savedir))
     elif arguments.download and not arguments.savedir:
         print("Downloads enabled (-D), will be saved to current directory.")
     else:
         print("Downloads were not enabled (-D), not saving results locally.")
-
     # start up bucket workers
     for i in range(0,arguments.threads):
-        print('Starting thread...')
+        log('Starting thread...',logging.DEBUG)
         t = Thread(target=bucket_worker)
         t.daemon = True
         t.start()
@@ -248,7 +253,7 @@ def main():
     with open(arguments.hostlist) as f:
         for line in f:
             bucket = 'http://'+line.rstrip()+'.s3.amazonaws.com'
-            print('Queuing {}'.format(bucket) + '...')
+            log('Queuing: {}'.format(bucket))
             bucket_q.put(bucket)
 
     bucket_q.join()
