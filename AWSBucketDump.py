@@ -17,6 +17,7 @@ import sys
 import os
 import shutil
 import traceback
+import yara
 from queue import Queue
 from threading import Thread, Lock
 
@@ -28,6 +29,15 @@ grep_list = None
 
 arguments = None
 
+yara_rules = None
+
+def yara_index_build():
+    with open('YaraRules/index.yar', 'w') as yar:
+        for filename in os.listdir('YaraRules'):
+            if filename.endswith('.yar') and filename != 'index.yar':
+                include = 'include "{0}"\n'.format(filename)
+                yar.write(include)
+
 def fetch(url):
     print('Fetching ' + url + '...')
     response = requests.get(url)
@@ -35,7 +45,7 @@ def fetch(url):
         status403(url)
     if response.status_code == 200:
         if "Content" in response.text:
-            returnedList=status200(response,grep_list,url)
+            returnedList=status200(response,grep_list,yara_rules,url)
 
 
 def bucket_worker():
@@ -107,6 +117,7 @@ def write_interesting_file(filepath):
 
 def downloadFile(filename):
     global arguments
+    allowFileWrite = True
     print('Downloading {}'.format(filename) + '...')
     local_path = get_make_directory_return_filename_path(filename)
     local_filename = (filename.split('/')[-1]).rstrip()
@@ -119,8 +130,18 @@ def downloadFile(filename):
             if int(r.headers['Content-Length']) > arguments.maxsize:
                 print("This file is greater than the specified max size... skipping...\n")
             else:
-                with open(local_path, 'wb') as f:
-                    shutil.copyfileobj(r.raw, f)
+                file_data = r.content
+                if yara_rules != None:
+                    matches = yara_rules.match(data=file_data)
+                    if len(matches) > 0:
+                        for match in matches:
+                            #print str(match.rule)
+                            print("{} matched a Yara rule - {}".format(filename,match))
+                    else:
+                        allowFileWrite = False
+                if allowFileWrite == True:
+                    with open(local_path, 'wb') as f:
+                        f.write(file_data)
         r.close()
 
 
@@ -151,7 +172,7 @@ def queue_up_download(filepath):
     write_interesting_file(filepath)
 
 
-def status200(response,grep_list,line):
+def status200(response,grep_list,yara_rules,line):
     print("Pilfering "+line.rstrip() + '...')
     objects=xmltodict.parse(response.text)
     Keys = []
@@ -177,6 +198,7 @@ def status200(response,grep_list,line):
 def main():
     global arguments
     global grep_list
+    global yara_rules
     parser = ArgumentParser()
     parser.add_argument("-D", dest="download", required=False, action="store_true", default=False, help="Download files. This requires significant disk space.") 
     parser.add_argument("-d", dest="savedir", required=False, default='', help="If -D, then -d 1 to create save directories for each bucket with results.")
@@ -184,7 +206,7 @@ def main():
     parser.add_argument("-g", dest="grepwords", required=False, help="Provide a wordlist to grep for.")
     parser.add_argument("-m", dest="maxsize", type=int, required=False, default=1024, help="Maximum file size to download.")
     parser.add_argument("-t", dest="threads", type=int, required=False, default=1, help="Number of threads.")
-
+    parser.add_argument("-Y", dest="runyara", required=False, action="store_true", default=False,help="Run Yara rules against downloads and only save matches")
     if len(sys.argv) == 1:
         print_banner()
         parser.error("No arguments given.")
@@ -195,6 +217,8 @@ def main():
     # output parsed arguments into a usable object
     arguments = parser.parse_args()
 
+    yara_index_build()
+    yara_rules = yara.compile("YaraRules/index.yar")
     # specify primary variables
     if arguments.grepwords != None:
         with open(arguments.grepwords, "r") as grep_file:
