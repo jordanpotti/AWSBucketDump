@@ -17,11 +17,18 @@ import sys
 import os
 import shutil
 import traceback
-import yara
+
 import logging
 from queue import Queue
 from threading import Thread, Lock
 from common import pretty_print, log
+
+try:
+    import yara
+    ENABLE_YARA=True
+except (OSError,ImportError):
+    log("Warning: Yara is not properly installed, will not enable",logging.WARNING)
+    ENABLE_YARA=False
 
 bucket_q = Queue()
 download_q = Queue()
@@ -223,7 +230,7 @@ def main():
     # output parsed arguments into a usable object
     arguments = parser.parse_args()
 
-    if arguments.runyara != False:
+    if arguments.runyara != False and ENABLE_YARA == True:
         yara_index_build()
         yara_rules = yara.compile("YaraRules/index.yar")
     # specify primary variables
