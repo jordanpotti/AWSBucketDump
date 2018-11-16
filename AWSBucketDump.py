@@ -138,10 +138,11 @@ def downloadFile(filename):
                 file_data = r.content
                 if yara_rules != None:
                     matches = yara_rules.match(data=file_data)
+                    #print(matches)
                     if len(matches) > 0:
-                        for match in matches:
+                        for match in matches['main']:
                             #print str(match.rule)
-                            log("Yara Rule Match: {} matched {}".format(filename,match))
+                            log("Yara Rule Match: {} matched {}".format(filename,(match['rule'])))
                     else:
                         allowFileWrite = False
                 if allowFileWrite == True:

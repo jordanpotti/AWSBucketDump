@@ -3,3 +3,4 @@ interesting_file.txt
 awsbucketdump.log
 *.pyc
 *.log
+*.swp
