@@ -38,7 +38,7 @@ After building this tool, I did find an [interesting article](https://community.
 
 ## Usage:
 
-    usage: AWSBucketDump.py [-h] [-D] [-t THREADS] -l HOSTLIST [-g GREPWORDS] [-m MAXSIZE]
+    usage: AWSBucketDump.py [-h] [-D] [-t THREADS] -l HOSTLIST [-g GREPWORDS] [-m MAXSIZE] [-Y]
 
     optional arguments:
       -h, --help    show this help message and exit
@@ -48,8 +48,8 @@ After building this tool, I did find an [interesting article](https://community.
       -l HOSTLIST
       -g GREPWORDS  Provide a wordlist to grep for
       -m MAXSIZE    Maximum file size to download.
-  
-     python AWSBucketDump.py -l BucketNames.txt -g interesting_Keywords.txt -D -m 500000 -d 1
+      -Y            Enable Yara scanning of downloaded files  
+     python AWSBucketDump.py -l samples/BucketNames.txt -g samples/InterestingKeywords.txt -D -m 500000 -d 1
 
 ### Contributors
 
