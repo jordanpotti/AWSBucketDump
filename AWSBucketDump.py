@@ -55,7 +55,7 @@ def fetch(url):
 def bucket_worker():
     while True:
         item = bucket_q.get()
-	print("Processing: {}".format(item))
+        print("Processing: {}".format(item))
         try:
             fetch(item)
         except Exception as e:
