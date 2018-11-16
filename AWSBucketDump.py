@@ -223,8 +223,9 @@ def main():
     # output parsed arguments into a usable object
     arguments = parser.parse_args()
 
-    yara_index_build()
-    yara_rules = yara.compile("YaraRules/index.yar")
+    if arguments.runyara != False:
+        yara_index_build()
+        yara_rules = yara.compile("YaraRules/index.yar")
     # specify primary variables
     if arguments.grepwords != None:
         with open(arguments.grepwords, "r") as grep_file:

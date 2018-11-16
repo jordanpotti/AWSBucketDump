@@ -9,6 +9,7 @@ Non-Standard Python Libraries:
 * xmltodict
 * requests
 * argparse
+* yara
 
 Created with Python 3.6
 
