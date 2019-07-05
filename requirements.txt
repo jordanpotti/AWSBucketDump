@@ -4,3 +4,4 @@ idna==2.6
 requests==2.20.0
 urllib3
 xmltodict==0.11.0
+yara
