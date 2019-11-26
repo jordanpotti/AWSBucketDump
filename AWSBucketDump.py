@@ -157,7 +157,10 @@ def status200(response,grep_list,line):
     Keys = []
     interest=[]
     try:
-        for child in objects['ListBucketResult']['Contents']:
+        contents = objects['ListBucketResult']['Contents']
+        if not isinstance(contents, list):
+            contents = [contents]
+        for child in contents:
             Keys.append(child['Key'])
     except:
         pass
@@ -196,9 +199,10 @@ def main():
     arguments = parser.parse_args()
 
     # specify primary variables
-    with open(arguments.grepwords, "r") as grep_file:
-        grep_content = grep_file.readlines()
-    grep_list = [ g.strip() for g in grep_content ]
+    if arguments.grepwords:
+        with open(arguments.grepwords, "r") as grep_file:
+            grep_content = grep_file.readlines()
+        grep_list = [ g.strip() for g in grep_content ]
 
     if arguments.download and arguments.savedir:
         print("Downloads enabled (-D), save directories (-d) for each host will be created/used.")
