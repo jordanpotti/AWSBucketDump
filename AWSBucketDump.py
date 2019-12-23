@@ -10,7 +10,6 @@
 # @ok_bye_now
 
 from argparse import ArgumentParser
-import codecs
 import requests
 import xmltodict
 import sys
@@ -35,7 +34,7 @@ def fetch(url):
         status403(url)
     if response.status_code == 200:
         if "Content" in response.text:
-            returnedList=status200(response,grep_list,url)
+            status200(response, grep_list, url)
 
 
 def bucket_worker():
@@ -87,6 +86,7 @@ def get_make_directory_return_filename_path(url):
     return os.path.join(directory, bits[-1]).rstrip()
 
 interesting_file_lock = Lock()
+
 def get_interesting_file_lock():
     interesting_file_lock.acquire()
 
@@ -126,20 +126,19 @@ def downloadFile(filename):
 
 
 def print_banner():
-        print('''\nDescription:
-        AWSBucketDump is a tool to quickly enumerate AWS S3 buckets to look for loot.
-        It's similar to a subdomain bruteforcer but is made specifically to S3
-        buckets and also has some extra features that allow you to grep for
-        delicous files as well as download interesting files if you're not
-        afraid to quickly fill up your hard drive.
+    print('''\nDescription:
+    AWSBucketDump is a tool to quickly enumerate AWS S3 buckets to look for loot.
+    It's similar to a subdomain bruteforcer but is made specifically to S3
+    buckets and also has some extra features that allow you to grep for
+    delicous files as well as download interesting files if you're not
+    afraid to quickly fill up your hard drive.
 
-        by Jordan Potti
-        @ok_bye_now'''
-        )   
+    by Jordan Potti
+    @ok_bye_now''')
 
 
 def cleanUp():
-   print("Cleaning up files...")
+    print("Cleaning up files...")
 
 def status403(line):
     print(line.rstrip() + " is not accessible.")
@@ -151,24 +150,22 @@ def queue_up_download(filepath):
     write_interesting_file(filepath)
 
 
-def status200(response,grep_list,line):
+def status200(response, grep_list, line):
     print("Pilfering "+line.rstrip() + '...')
-    objects=xmltodict.parse(response.text)
+    objects = xmltodict.parse(response.text)
     Keys = []
-    interest=[]
     try:
         contents = objects['ListBucketResult']['Contents']
         if not isinstance(contents, list):
             contents = [contents]
         for child in contents:
             Keys.append(child['Key'])
-    except:
+    except KeyError:
         pass
-    hit = False
     for words in Keys:
         words = (str(words)).rstrip()
         collectable = line+'/'+words
-        if grep_list != None and len(grep_list) > 0:
+        if grep_list is not None and len(grep_list) > 0:
             for grep_line in grep_list:
                 grep_line = (str(grep_line)).rstrip()
                 if grep_line in words:
@@ -181,7 +178,7 @@ def main():
     global arguments
     global grep_list
     parser = ArgumentParser()
-    parser.add_argument("-D", dest="download", required=False, action="store_true", default=False, help="Download files. This requires significant disk space.") 
+    parser.add_argument("-D", dest="download", required=False, action="store_true", default=False, help="Download files. This requires significant disk space.")
     parser.add_argument("-d", dest="savedir", required=False, default='', help="If -D, then -d 1 to create save directories for each bucket with results.")
     parser.add_argument("-l", dest="hostlist", required=True, help="") 
     parser.add_argument("-g", dest="grepwords", required=False, help="Provide a wordlist to grep for.")
@@ -191,10 +188,9 @@ def main():
     if len(sys.argv) == 1:
         print_banner()
         parser.error("No arguments given.")
-        parser.print_usage
+        parser.print_usage()
         sys.exit()
 
-    
     # output parsed arguments into a usable object
     arguments = parser.parse_args()
 
@@ -202,7 +198,7 @@ def main():
     if arguments.grepwords:
         with open(arguments.grepwords, "r") as grep_file:
             grep_content = grep_file.readlines()
-        grep_list = [ g.strip() for g in grep_content ]
+        grep_list = [g.strip() for g in grep_content]
 
     if arguments.download and arguments.savedir:
         print("Downloads enabled (-D), save directories (-d) for each host will be created/used.")
@@ -212,14 +208,14 @@ def main():
         print("Downloads were not enabled (-D), not saving results locally.")
 
     # start up bucket workers
-    for i in range(0,arguments.threads):
+    for _ in range(0, arguments.threads):
         print('Starting thread...')
         t = Thread(target=bucket_worker)
         t.daemon = True
         t.start()
-       
-    # start download workers 
-    for i in range(1, arguments.threads):
+
+    # start download workers
+    for _ in range(0, arguments.threads - 1):
         t = Thread(target=downloadWorker)
         t.daemon = True
         t.start()
