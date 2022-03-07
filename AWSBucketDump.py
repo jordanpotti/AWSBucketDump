@@ -215,7 +215,7 @@ def main():
         t.start()
 
     # start download workers
-    for _ in range(0, arguments.threads - 1):
+    for i in range(0, arguments.threads):
         t = Thread(target=downloadWorker)
         t.daemon = True
         t.start()
