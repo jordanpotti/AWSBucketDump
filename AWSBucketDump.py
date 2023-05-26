@@ -182,7 +182,8 @@ def main():
     parser.add_argument("-d", dest="savedir", required=False, default='', help="If -D, then -d 1 to create save directories for each bucket with results.")
     parser.add_argument("-l", dest="hostlist", required=True, help="") 
     parser.add_argument("-g", dest="grepwords", required=False, help="Provide a wordlist to grep for.")
-    parser.add_argument("-m", dest="maxsize", type=int, required=False, default=1024, help="Maximum file size to download.")
+    # parser.add_argument("-m", dest="maxsize", type=int, required=False, default=1024, help="Maximum file size to download.")
+    parser.add_argument("-m", dest="maxsize", type=int, required=False, default=None, help="Maximum file size to download.")
     parser.add_argument("-t", dest="threads", type=int, required=False, default=1, help="Number of threads.")
 
     if len(sys.argv) == 1:
